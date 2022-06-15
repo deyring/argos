@@ -1,0 +1,44 @@
+version: 1.0.0
+name: GoogleChecks
+execute: loop
+sleep: 10
+output:
+  type: stdout
+transactions:
+    - name: Google Search
+      checks:
+        - name: google.com
+          url: https://www.google.com/
+          method: GET
+          headers:
+            User-Agent: argos test client
+          body: ""
+          timeout: 5
+          assertions:
+            - name: status
+              type: status_code
+              value: "200"
+        - name: google.de
+          url: https://www.google.de/
+          method: GET
+          headers:
+            User-Agent: argos test client
+          body: ""
+          timeout: 5
+          assertions:
+            - name: status
+              type: status_code
+              value: "200"
+    - name: Google Mail
+      checks:
+        - name: images
+          url: https://www.google.de/imghp
+          method: GET
+          headers:
+            User-Agent: argos test client
+          body: ""
+          timeout: 5
+          assertions:
+            - name: status
+              type: status_code
+              value: "200"

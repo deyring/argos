@@ -51,6 +51,7 @@ const (
 )
 
 type EndpointCheckResult struct {
+	Name                 string
 	StatusCode           int
 	Body                 []byte
 	Headers              map[string][]string

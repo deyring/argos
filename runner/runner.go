@@ -1,16 +1,20 @@
 package runner
 
 import (
-	"fmt"
+	"errors"
+	"time"
 
 	"github.com/deyring/argos/models"
+	"github.com/deyring/argos/resultsink"
+	"github.com/deyring/argos/resultsink/sinkfactory"
 	"github.com/deyring/argos/runner/executor"
 	"github.com/deyring/argos/utils"
 )
 
 type Runner struct {
-	logger utils.Logger
-	config *models.Config
+	logger     utils.Logger
+	config     *models.Config
+	resultSink resultsink.Sink
 }
 
 func New(logger utils.Logger, configFilename string) (*Runner, error) {
@@ -19,38 +23,94 @@ func New(logger utils.Logger, configFilename string) (*Runner, error) {
 		return nil, err
 	}
 
+	resultSink, err := initResultSink(config)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Runner{
-		logger: logger,
-		config: config,
+		logger:     logger,
+		config:     config,
+		resultSink: resultSink,
 	}, nil
 }
 
+func initResultSink(config *models.Config) (resultsink.Sink, error) {
+	switch config.Output.Type {
+	case "stdout":
+		return sinkfactory.GetNewStdoutSink(), nil
+	default:
+		return nil, errors.New("unknown output type")
+	}
+}
+
 func (r *Runner) Run() error {
-	r.logger.Debugf("running checks on %s", r.config.Name)
-	for _, transaction := range r.config.Transactions {
-		results, err := r.runTransaction(&transaction)
+	r.logger.Infof("running checks on %s. Execution strategy: %s", r.config.Name, r.config.Execute)
+
+	if r.config.Execute == models.ExecuteTypeLoop {
+		for {
+			result, err := r.runCheck()
+			if err != nil {
+				return err
+			}
+
+			if err := r.resultSink.Handle(result); err != nil {
+				return err
+			}
+
+			time.Sleep(time.Duration(r.config.Sleep) * time.Second)
+		}
+	} else {
+		result, err := r.runCheck()
 		if err != nil {
 			return err
 		}
 
-		for _, result := range results {
-			fmt.Printf("Result %s:\nSuccess: %v\nStatusCode:%d\nTLS Handshake: %s\nTTFB: %s\nTotal Duration:%s", transaction.Name, result.Success, result.StatusCode, result.TLSHandshakeDuration, result.FirstByteDuration, result.TotalDuration)
+		if err := r.resultSink.Handle(result); err != nil {
+			return err
 		}
 	}
+
 	return nil
 }
 
-func (r *Runner) runTransaction(transaction *models.Transaction) ([]*models.EndpointCheckResult, error) {
+func (r *Runner) runCheck() (*models.Result, error) {
+	result := &models.Result{
+		Name:               r.config.Name,
+		TransactionResults: []models.TransactionResult{},
+	}
+	for _, transaction := range r.config.Transactions {
+		transactionResult, err := r.runTransaction(&transaction)
+		if err != nil {
+			return nil, err
+		}
+
+		result.TransactionResults = append(result.TransactionResults, *transactionResult)
+	}
+	return result, nil
+}
+
+func (r *Runner) runTransaction(transaction *models.Transaction) (*models.TransactionResult, error) {
 	r.logger.Debugf("running checks on transaction %s", transaction.Name)
-	checkResults := []*models.EndpointCheckResult{}
+	transactionResult := &models.TransactionResult{
+		Name:                 transaction.Name,
+		Success:              true,
+		EndpointCheckResults: []models.EndpointCheckResult{},
+	}
+
 	for _, check := range transaction.Checks {
 		result, err := r.executeCheck(&check)
 		if err != nil {
 			return nil, err
 		}
-		checkResults = append(checkResults, result)
+
+		if !result.Success {
+			transactionResult.Success = false
+		}
+
+		transactionResult.EndpointCheckResults = append(transactionResult.EndpointCheckResults, *result)
 	}
-	return checkResults, nil
+	return transactionResult, nil
 }
 
 func (r *Runner) executeCheck(check *models.EndpointCheck) (*models.EndpointCheckResult, error) {

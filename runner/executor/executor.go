@@ -21,6 +21,7 @@ type Executor interface {
 type executor struct {
 	request *http.Request
 	timeout int
+	name    string
 }
 
 func New(endpointCheck *models.EndpointCheck) (Executor, error) {
@@ -37,6 +38,7 @@ func New(endpointCheck *models.EndpointCheck) (Executor, error) {
 	return &executor{
 		request: request,
 		timeout: timeout,
+		name:    endpointCheck.Name,
 	}, nil
 }
 
@@ -102,6 +104,7 @@ func (e *executor) Run() (*models.EndpointCheckResult, error) {
 	totalDone = time.Since(start)
 
 	result := &models.EndpointCheckResult{
+		Name:                 e.name,
 		StatusCode:           response.StatusCode,
 		Body:                 body,
 		Headers:              response.Header,
