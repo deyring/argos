@@ -12,7 +12,7 @@ type Config struct {
 	Execute      ExecuteType   `yaml:"execute"`
 	Sleep        int           `yaml:"sleep"`
 	Transactions []Transaction `yaml:"transactions"`
-	Output       Output        `yaml:"output"`
+	Outputs      []Output      `yaml:"outputs"`
 }
 
 type ExecuteType string
@@ -63,9 +63,14 @@ type TransactionResult struct {
 type OutputType string
 
 const (
-	OutputTypeStdOut OutputType = "stdout"
+	OutputTypeStdOut   OutputType = "stdout"
+	OutputTypeInfluxDB OutputType = "influxdb"
 )
 
 type Output struct {
-	Type string `yaml:"type"`
+	Type     OutputType `yaml:"type"`
+	Host     string     `yaml:"host"`
+	User     string     `yaml:"user"`
+	Password string     `yaml:"password"`
+	Database string     `yaml:"database"`
 }

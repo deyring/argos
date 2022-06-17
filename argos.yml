@@ -1,42 +1,80 @@
 version: 1.0.0
-name: GoogleChecks
+name: IntegrationTestsHTTPBin
 execute: loop
-sleep: 10
-output:
-  type: stdout
+sleep: 4
+outputs:
+  - type: stdout
+  - type: influxdb
+    host: http://localhost:8086
+    user: dev
+    password: pw
+    database: db0
 transactions:
-    - name: Google Search
+    - name: HTTPBin-Happy
       checks:
-        - name: google.com
-          url: https://www.google.com/
+        - name: bin/get
+          url: http://localhost:8087/get
           method: GET
           headers:
-            User-Agent: argos test client
+            User-Agent: argos_test_client
           body: ""
           timeout: 5
           assertions:
             - name: status
               type: status_code
               value: "200"
-        - name: google.de
-          url: https://www.google.de/
+        - name: bin/post
+          url: http://localhost:8087/post
+          method: POST
+          headers:
+            User-Agent: argos_test_client
+          body: '{"message":"test"}'
+          timeout: 5
+          assertions:
+            - name: status
+              type: status_code
+              value: "200"
+        - name: bin/put
+          url: http://localhost:8087/put
+          method: PUT
+          headers:
+            User-Agent: argos_test_client
+          body: '{"message":"test"}'
+          timeout: 5
+          assertions:
+            - name: status
+              type: status_code
+              value: "200"
+    - name: HTTPBin-Failing
+      checks:
+        - name: bin/get
+          url: http://localhost:8087/get
           method: GET
           headers:
-            User-Agent: argos test client
+            User-Agent: argos_test_client
           body: ""
           timeout: 5
           assertions:
             - name: status
               type: status_code
               value: "200"
-    - name: Google Mail
-      checks:
-        - name: images
-          url: https://www.google.de/imghp
-          method: GET
+        - name: bin/post
+          url: http://localhost:8087/post
+          method: POST
           headers:
-            User-Agent: argos test client
-          body: ""
+            User-Agent: argos_test_client
+          body: '{"message":"test"}'
+          timeout: 5
+          assertions:
+            - name: status
+              type: status_code
+              value: "200"
+        - name: bin/status/500
+          url: http://localhost:8087/status/200
+          method: PUT
+          headers:
+            User-Agent: argos_test_client
+          body: '{"message":"test"}'
           timeout: 5
           assertions:
             - name: status

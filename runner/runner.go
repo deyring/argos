@@ -12,9 +12,9 @@ import (
 )
 
 type Runner struct {
-	logger     utils.Logger
-	config     *models.Config
-	resultSink resultsink.Sink
+	logger      utils.Logger
+	config      *models.Config
+	resultSinks []resultsink.Sink
 }
 
 func New(logger utils.Logger, configFilename string) (*Runner, error) {
@@ -23,22 +23,38 @@ func New(logger utils.Logger, configFilename string) (*Runner, error) {
 		return nil, err
 	}
 
-	resultSink, err := initResultSink(config)
+	resultSinks, err := initResultSinks(config)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Runner{
-		logger:     logger,
-		config:     config,
-		resultSink: resultSink,
+		logger:      logger,
+		config:      config,
+		resultSinks: resultSinks,
 	}, nil
 }
 
-func initResultSink(config *models.Config) (resultsink.Sink, error) {
-	switch config.Output.Type {
-	case "stdout":
+func initResultSinks(config *models.Config) ([]resultsink.Sink, error) {
+	resultSinks := []resultsink.Sink{}
+
+	for _, sinkConfig := range config.Outputs {
+		sink, err := initResultSink(sinkConfig)
+		if err != nil {
+			return nil, err
+		}
+		resultSinks = append(resultSinks, sink)
+	}
+
+	return resultSinks, nil
+}
+
+func initResultSink(output models.Output) (resultsink.Sink, error) {
+	switch output.Type {
+	case models.OutputTypeStdOut:
 		return sinkfactory.GetNewStdoutSink(), nil
+	case models.OutputTypeInfluxDB:
+		return sinkfactory.GetNewInfluxDBSink(output.Host, output.User, output.Password, output.Database), nil
 	default:
 		return nil, errors.New("unknown output type")
 	}
@@ -54,8 +70,10 @@ func (r *Runner) Run() error {
 				return err
 			}
 
-			if err := r.resultSink.Handle(result); err != nil {
-				return err
+			for _, sink := range r.resultSinks {
+				if err := sink.Handle(result); err != nil {
+					return err
+				}
 			}
 
 			time.Sleep(time.Duration(r.config.Sleep) * time.Second)
@@ -66,8 +84,10 @@ func (r *Runner) Run() error {
 			return err
 		}
 
-		if err := r.resultSink.Handle(result); err != nil {
-			return err
+		for _, sink := range r.resultSinks {
+			if err := sink.Handle(result); err != nil {
+				return err
+			}
 		}
 	}
 
