@@ -13,18 +13,6 @@ services:
       - INFLUXDB_ADMIN_PASSWORD=admin
       - INFLUXDB_USER=dev
       - INFLUXDB_USER_PASSWORD=pw
-  chronograf:
-    image: chronograf:latest
-    ports:
-      - '127.0.0.1:8888:8888'
-    volumes:
-      - chronograf-storage:/var/lib/chronograf
-    depends_on:
-      - influxdb
-    environment:
-      - INFLUXDB_URL=http://influxdb:8086
-      - INFLUXDB_USERNAME=admin
-      - INFLUXDB_PASSWORD=admin
   grafana:
     image: grafana/grafana:latest
     ports:

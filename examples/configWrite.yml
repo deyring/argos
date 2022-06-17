@@ -1,0 +1,19 @@
+version: 1.0.0
+name: ""
+execute: ""
+sleep: 0
+transactions:
+    - name: Google Search
+      checks:
+        - name: index
+          url: https://www.google.com/
+          method: GET
+          headers:
+            User-Agent: argos test client
+          body: ""
+          timeout: 5
+          assertions:
+            - name: status
+              type: status_code
+              value: "200"
+outputs: []

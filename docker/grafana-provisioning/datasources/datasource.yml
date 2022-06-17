@@ -1,6 +1,6 @@
 apiVersion: 1
 datasources:
-  - name: InfluxDB
+  - name: DS_INFLUXDB
     type: influxdb
     access: proxy
     database: db0

@@ -17,6 +17,7 @@ func TestConfig(t *testing.T) {
 	t.Run("SavesConfig", func(t *testing.T) {
 		config := &Config{
 			Version: "1.0.0",
+			Outputs: []Output{},
 			Transactions: []Transaction{
 				{
 					Name: "Google Search",
@@ -46,6 +47,7 @@ func TestConfig(t *testing.T) {
 		filename := "../examples/configWrite.yml"
 		config := &Config{
 			Version: "1.0.0",
+			Outputs: []Output{},
 			Transactions: []Transaction{
 				{
 					Name: "Google Search",

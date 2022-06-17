@@ -70,7 +70,7 @@ transactions:
               type: status_code
               value: "200"
         - name: bin/status/500
-          url: http://localhost:8087/status/200
+          url: http://localhost:8087/status/500
           method: PUT
           headers:
             User-Agent: argos_test_client
