@@ -35,7 +35,7 @@ defaults:
         with:
           # relative path to the place where source code with Dockerfile is located
           context: .
-          file: {context}/docker/Dockerfile
+          file: ./docker/Dockerfile
           # Note: tags has to be all lower-case
           tags: |
             deyring/argos:latest 
