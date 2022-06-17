@@ -1,6 +1,7 @@
 package models
 
 import (
+	"io"
 	"io/ioutil"
 
 	"gopkg.in/yaml.v3"
@@ -22,13 +23,14 @@ const (
 	ExecuteTypeLoop ExecuteType = "loop"
 )
 
-func (c *Config) Load(filename string) error {
-	configFile, err := ioutil.ReadFile(filename)
+func (c *Config) Load(configFileReader io.Reader) error {
+
+	fileContent, err := ioutil.ReadAll(configFileReader)
 	if err != nil {
 		return err
 	}
 
-	if err := yaml.Unmarshal(configFile, c); err != nil {
+	if err := yaml.Unmarshal(fileContent, c); err != nil {
 		return err
 	}
 

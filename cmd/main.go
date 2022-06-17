@@ -1,7 +1,8 @@
 package main
 
 import (
-	"flag"
+	"io"
+	"os"
 
 	"github.com/deyring/argos/runner"
 	"github.com/deyring/argos/utils"
@@ -11,10 +12,12 @@ func main() {
 	logger := utils.NewLogrusLogger()
 	logger.Info("starting argos...")
 
-	flags := parseFlags()
-	logger.Debugf("parsed flags: %v", flags)
+	configFileReader, err := openStdinOrFile()
+	if err != nil {
+		logger.Fatalf("failed to open config file: %v", err)
+	}
 
-	runner, err := runner.New(logger, flags.Filename)
+	runner, err := runner.New(logger, configFileReader)
 	if err != nil {
 		logger.Fatalf("failed to create runner: %v", err)
 	}
@@ -24,12 +27,14 @@ func main() {
 	}
 }
 
-func parseFlags() *flags {
-	filenamePtr := flag.String("f", "argos.yml", "filename of the argos config file")
-	// Parse flags
-	flag.Parse()
-
-	return &flags{
-		Filename: *filenamePtr,
+func openStdinOrFile() (io.Reader, error) {
+	var err error
+	r := os.Stdin
+	if len(os.Args) > 1 {
+		r, err = os.Open(os.Args[1])
+		if err != nil {
+			return nil, err
+		}
 	}
+	return r, nil
 }

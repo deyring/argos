@@ -1,13 +1,14 @@
 ##
 ## Build
 ##
-FROM golang:1.18-bullseye AS build
+FROM golang:1.18-alpine as builder
 
 WORKDIR /app
 
-COPY . .
+ADD . .
 
 RUN go mod download
+RUN apk --no-cache add git
 
 RUN go build -o argos -v github.com/deyring/argos/cmd
 
@@ -15,11 +16,12 @@ RUN go build -o argos -v github.com/deyring/argos/cmd
 ## Deploy
 ##
 FROM alpine:3.16
+RUN apk add --no-cache ca-certificates && \
+    adduser -D -u 12345 -g 12345 argos
 
-WORKDIR /
+COPY --from=builder ./app/argos /usr/bin/argos
 
-COPY --from=build /app/argos .
+USER 12345
+WORKDIR /home/argos
 
-USER nonroot:nonroot
-
-ENTRYPOINT ["/argos"]
+ENTRYPOINT [ "argos" ]

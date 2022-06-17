@@ -2,6 +2,7 @@ package runner
 
 import (
 	"errors"
+	"io"
 	"time"
 
 	"github.com/deyring/argos/models"
@@ -17,9 +18,9 @@ type Runner struct {
 	resultSinks []resultsink.Sink
 }
 
-func New(logger utils.Logger, configFilename string) (*Runner, error) {
+func New(logger utils.Logger, configFileReader io.Reader) (*Runner, error) {
 	config := &models.Config{}
-	if err := config.Load(configFilename); err != nil {
+	if err := config.Load(configFileReader); err != nil {
 		return nil, err
 	}
 

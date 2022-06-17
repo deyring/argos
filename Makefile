@@ -1,5 +1,5 @@
 run:
-	go run github.com/deyring/argos/cmd
+	go run github.com/deyring/argos/cmd -f argos.yml
 test:
 	go test github.com/deyring/argos/...
 build-image:
