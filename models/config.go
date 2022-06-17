@@ -37,15 +37,6 @@ func (c *Config) Load(configFileReader io.Reader) error {
 	return nil
 }
 
-func (c *Config) Save(filename string) error {
-	configFile, err := yaml.Marshal(c)
-	if err != nil {
-		return err
-	}
-
-	return ioutil.WriteFile(filename, configFile, 0644)
-}
-
 type Result struct {
 	Name               string
 	TransactionResults []TransactionResult
