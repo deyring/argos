@@ -143,7 +143,12 @@ func (r *Runner) executeCheck(check *models.EndpointCheck) (*models.EndpointChec
 
 	result, err := executorInstance.Run()
 	if err != nil {
-		return nil, err
+		r.logger.Warningf("check %s failed: %s", check.Name, err.Error())
+		return &models.EndpointCheckResult{
+			Name:    check.Name,
+			Success: false,
+			Error:   err.Error(),
+		}, nil
 	}
 
 	success, err := check.AssertResult(result)

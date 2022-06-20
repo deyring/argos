@@ -1,8 +1,8 @@
 package models
 
 import (
-	"errors"
-	"strconv"
+	"net/url"
+	"strings"
 	"time"
 )
 
@@ -16,22 +16,50 @@ type EndpointCheck struct {
 	Assertions []Assertion       `yaml:"assertions"`
 }
 
+func (c *EndpointCheck) Validate() error {
+	if len(c.Name) == 0 {
+		return ErrorCheckNameMissing
+	}
+
+	if len(c.URL) == 0 {
+		return ErrorCheckURLMissing
+	}
+
+	u, err := url.ParseRequestURI(c.URL)
+	if err != nil {
+		return ErrorCheckURLInvalid
+	}
+	c.URL = u.String()
+
+	c.Method = Method(strings.ToUpper(string(c.Method)))
+
+	if c.Method != MethodGet &&
+		c.Method != MethodHead &&
+		c.Method != MethodPost &&
+		c.Method != MethodPut &&
+		c.Method != MethodPatch &&
+		c.Method != MethodDelete &&
+		c.Method != MethodConnect &&
+		c.Method != MethodOptions &&
+		c.Method != MethodTrace {
+		return ErrorCheckInvalidMethod
+	}
+
+	if c.Assertions == nil || len(c.Assertions) == 0 {
+		return ErrorCheckAssertionsMissing
+	}
+
+	return nil
+}
+
 func (c *EndpointCheck) AssertResult(result *EndpointCheckResult) (success bool, err error) {
 	success = true
 	for _, assertion := range c.Assertions {
-		switch assertion.Type {
-		case AssertionTypeStatusCode:
-			if assertion.Value != strconv.Itoa(result.StatusCode) {
-				success = false
-			}
-		case AssertionTypeBody:
-			if assertion.Value != string(result.Body) {
-				success = false
-			}
-		case AssertionTypeHeader:
-			err = errors.New("Header Assertion not implemented")
-			return
+		assertSuccess, err := assertion.AssertResult(result)
+		if err != nil {
+			return false, err
 		}
+		success = success && assertSuccess
 	}
 	return
 }
@@ -53,6 +81,7 @@ const (
 type EndpointCheckResult struct {
 	Name                 string
 	StatusCode           int
+	Error                string
 	Body                 []byte
 	Headers              map[string][]string
 	DNSDuration          time.Duration

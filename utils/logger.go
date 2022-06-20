@@ -18,6 +18,6 @@ type Logger interface {
 
 func NewLogrusLogger() Logger {
 	log := logrus.New()
-	log.Level = logrus.DebugLevel
+	log.Level = logrus.InfoLevel
 	return log
 }

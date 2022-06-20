@@ -47,6 +47,18 @@ type Transaction struct {
 	Checks []EndpointCheck `yaml:"checks"`
 }
 
+func (t *Transaction) Validate() error {
+	if len(t.Name) == 0 {
+		return ErrorTransactionNameMissing
+	}
+
+	if len(t.Checks) == 0 || t.Checks == nil {
+		return ErrorTransactionChecksMissing
+	}
+
+	return nil
+}
+
 type TransactionResult struct {
 	Name                 string
 	Success              bool
