@@ -3,6 +3,7 @@ package models
 import (
 	"io"
 	"io/ioutil"
+	"os"
 
 	"gopkg.in/yaml.v3"
 )
@@ -29,6 +30,8 @@ func (c *Config) Load(configFileReader io.Reader) error {
 	if err != nil {
 		return err
 	}
+
+	fileContent = []byte(os.ExpandEnv(string(fileContent)))
 
 	if err := yaml.Unmarshal(fileContent, c); err != nil {
 		return err
