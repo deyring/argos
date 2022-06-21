@@ -18,7 +18,6 @@ type influxSink struct {
 }
 
 func New(host, user, password, database string) resultsink.Sink {
-	fmt.Println("connecting to influxdb", host, user, password, database)
 	client, err := influxdb.NewHTTPClient(influxdb.HTTPConfig{
 		Addr:     host,
 		Username: user,
