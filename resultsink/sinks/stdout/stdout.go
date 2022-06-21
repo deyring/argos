@@ -1,19 +1,21 @@
 package stdout
 
 import (
-	"os"
+	"io"
 
 	"github.com/deyring/argos/models"
 	resultsink "github.com/deyring/argos/resultsink"
+	"github.com/gosuri/uilive"
 	"github.com/jedib0t/go-pretty/v6/table"
 )
 
 type stdoutSink struct {
+	writer io.Writer
 }
 
 func (s *stdoutSink) Handle(result *models.Result) error {
 
-	printTable(result)
+	s.printTable(result)
 
 	/* printEndpointCheckResult := func(result models.EndpointCheckResult) string {
 		return fmt.Sprintf("\t%s: %s\n\tStats: StatusCode: %d, Connect: %s, TLS Handshake: %s, First Byte: %s, Total Duration: %s\n", result.Name,
@@ -46,9 +48,9 @@ func (s *stdoutSink) Handle(result *models.Result) error {
 	return nil
 }
 
-func printTable(result *models.Result) {
+func (s *stdoutSink) printTable(result *models.Result) {
 	t := table.NewWriter()
-	t.SetOutputMirror(os.Stdout)
+	t.SetOutputMirror(s.writer)
 	t.AppendHeader(table.Row{"Transaction", "Endpoint Name", "Success", "StatusCode", "Connect", "TLS Handshake", "First Byte", "Total"})
 	for _, transactionResult := range result.TransactionResults {
 		for _, endpointResult := range transactionResult.EndpointCheckResults {
@@ -66,5 +68,11 @@ func boolToEmoji(success bool) string {
 }
 
 func New() resultsink.Sink {
-	return &stdoutSink{}
+	writer := uilive.New()
+	// start listening for updates and render
+	writer.Start()
+
+	return &stdoutSink{
+		writer: writer,
+	}
 }

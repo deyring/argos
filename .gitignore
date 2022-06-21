@@ -16,3 +16,4 @@
 .DS_Store
 fly.yml
 api.yml
+.env
