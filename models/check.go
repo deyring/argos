@@ -81,6 +81,7 @@ const (
 type EndpointCheckResult struct {
 	Name                 string
 	StatusCode           int
+	URL                  string
 	Error                string
 	Body                 []byte
 	Headers              map[string][]string

@@ -106,6 +106,7 @@ func (e *executor) Run() (*models.EndpointCheckResult, error) {
 	result := &models.EndpointCheckResult{
 		Name:                 e.name,
 		StatusCode:           response.StatusCode,
+		URL:                  e.request.URL.String(),
 		Body:                 body,
 		Headers:              response.Header,
 		DNSDuration:          dnsDone,

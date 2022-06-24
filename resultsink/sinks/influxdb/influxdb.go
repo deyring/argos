@@ -55,7 +55,7 @@ func (s *influxSink) Handle(result *models.Result) error {
 		bp.AddPoint(pt)
 
 		for _, endpoint := range transaction.EndpointCheckResults {
-			tags := map[string]string{"config": fmt.Sprintf("%s", result.Name), "transaction": transaction.Name, "endpoint": endpoint.Name}
+			tags := map[string]string{"config": fmt.Sprintf("%s", result.Name), "transaction": transaction.Name, "endpoint": endpoint.Name, "url": endpoint.URL}
 			fields := map[string]interface{}{
 				"success":                boolToInt(endpoint.Success),
 				"connect_duration":       int64(endpoint.ConnectDuration),
