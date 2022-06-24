@@ -10,6 +10,6 @@ func GetNewStdoutSink() resultsink.Sink {
 	return stdout.New()
 }
 
-func GetNewInfluxDBSink(host, user, password, databse string) resultsink.Sink {
-	return influxdb.New(host, user, password, databse)
+func GetNewInfluxDBSink(host, user, password, databse string, insecure bool) resultsink.Sink {
+	return influxdb.New(host, user, password, databse, insecure)
 }

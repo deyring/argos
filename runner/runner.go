@@ -55,7 +55,7 @@ func initResultSink(output models.Output) (resultsink.Sink, error) {
 	case models.OutputTypeStdOut:
 		return sinkfactory.GetNewStdoutSink(), nil
 	case models.OutputTypeInfluxDB:
-		return sinkfactory.GetNewInfluxDBSink(output.Host, output.User, output.Password, output.Database), nil
+		return sinkfactory.GetNewInfluxDBSink(output.Host, output.User, output.Password, output.Database, output.Insecure), nil
 	default:
 		return nil, errors.New("unknown output type")
 	}

@@ -1,0 +1,76 @@
+version: 1.0.0
+name: Fyleralarm REST APIs Monitoring
+execute: loop
+sleep: 10
+outputs:
+  - type: stdout
+  - type: influxdb
+    host: http://localhost:8086
+    user: dev
+    password: pw
+    database: db0
+transactions:
+    - name: REST/V2
+      checks:
+        - name: groups
+          url: https://rest.flyeralarm-esolutions.com/de/v2/catalog/groups/8305
+          method: GET
+          headers:
+            User-Agent: argos_test_client
+            Authorization: Bearer ${REST_TOKEN}
+          body: ""
+          timeout: 5
+          assertions:
+            - name: status
+              type: status_code
+              value: "200"
+        - name: variants
+          url: https://rest.flyeralarm-esolutions.com/de/v2/catalog/variants/593025
+          method: GET
+          headers:
+            User-Agent: argos_test_client
+            Authorization: Bearer ${REST_TOKEN}
+          body: ""
+          timeout: 5
+          assertions:
+            - name: status
+              type: status_code
+              value: "200"
+        - name: orderstatus
+          url: https://rest.flyeralarm-esolutions.com/de/v2/orders/DE221344511/status
+          method: GET
+          headers:
+            User-Agent: argos_test_client
+            Authorization: Bearer ${REST_TOKEN}
+          body: ""
+          timeout: 5
+          assertions:
+            - name: status
+              type: status_code
+              value: "200"
+    - name: GoKart
+      checks:
+        - name: groups
+          url: https://rest.flyeralarm-esolutions.com/de/v2/catalog/groups/8305
+          method: GET
+          headers:
+            User-Agent: argos_test_client
+            Authorization: Bearer ${GOKART_TOKEN}
+          body: ""
+          timeout: 5
+          assertions:
+            - name: status
+              type: status_code
+              value: "200"
+        - name: variants
+          url: https://rest.flyeralarm-esolutions.com/de/v2/catalog/variants/593025
+          method: GET
+          headers:
+            User-Agent: argos_test_client
+            Authorization: Bearer ${GOKART_TOKEN}
+          body: ""
+          timeout: 5
+          assertions:
+            - name: status
+              type: status_code
+              value: "200"

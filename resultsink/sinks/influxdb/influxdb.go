@@ -17,11 +17,12 @@ type influxSink struct {
 	database string
 }
 
-func New(host, user, password, database string) resultsink.Sink {
+func New(host, user, password, database string, insecure bool) resultsink.Sink {
 	client, err := influxdb.NewHTTPClient(influxdb.HTTPConfig{
-		Addr:     host,
-		Username: user,
-		Password: password,
+		Addr:               host,
+		Username:           user,
+		Password:           password,
+		InsecureSkipVerify: insecure,
 	})
 	if err != nil {
 		log.Fatalf("initiatializing influxdb client failed: %v", err)
